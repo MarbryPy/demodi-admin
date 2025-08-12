@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Game Card Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#1976D2',
+                        'primary-dark': '#1565C0',
+                        secondary: '#424242',
+                        success: '#388E3C',
+                        warning: '#F57C00',
+                        error: '#D32F2F',
+                        surface: '#FFFFFF',
+                        background: '#FAFAFA'
+                    },
+                    boxShadow: {
+                        'material': '0 2px 4px rgba(0,0,0,0.1), 0 8px 16px rgba(0,0,0,0.1)',
+                        'material-lg': '0 4px 8px rgba(0,0,0,0.12), 0 16px 24px rgba(0,0,0,0.15)'
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="font-inter bg-background min-h-screen">
+    <!-- Header -->
+    <!-- @COMPONENT: Header [navigation and search] -->
+    <header class="bg-surface shadow-material sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo and Title -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-primary text-white p-2 rounded-lg">
+                        <i class="fas fa-dice-d20 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-semibold text-gray-900">Dice Card Manager</h1>
+                        <p class="text-sm text-gray-500" data-mock="true">Manage your dice game cards</p>
+                    </div>
+                </div>
+                
+                <!-- Search Bar -->
+                <div class="flex-1 max-w-md mx-8">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input 
+                            type="text" 
+                            placeholder="Search cards by name, effect, or dice requirement..."
+                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                            data-implementation="Implement real-time search functionality"
+                        >
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div class="flex items-center space-x-3">
+                    <button 
+                        class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors flex items-center space-x-2"
+                        data-event="click:openAddCardModal"
+                        data-implementation="Open add new card modal"
+                    >
+                        <i class="fas fa-plus"></i>
+                        <span>Add Card</span>
+                    </button>
+                    
+                    <!-- View Toggle -->
+                    <div class="flex bg-gray-100 rounded-lg p-1">
+                        <button 
+                            class="px-3 py-1 rounded text-sm transition-colors bg-white shadow-sm text-primary"
+                            data-implementation="Switch to grid view"
+                        >
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                        <button 
+                            class="px-3 py-1 rounded text-sm transition-colors text-gray-600 hover:text-primary"
+                            data-implementation="Switch to list view"
+                        >
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: Header -->
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Stats Bar -->
+        <!-- @COMPONENT: StatsBar [card count and filters] -->
+        <div class="bg-surface rounded-lg shadow-material p-6 mb-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-8">
+                    <div>
+                        <p class="text-2xl font-bold text-gray-900" data-bind="cards.length">24</p>
+                        <p class="text-sm text-gray-500">Total Cards</p>
+                    </div>
+                    <div class="h-8 w-px bg-gray-300"></div>
+                    <div>
+                        <p class="text-lg font-semibold text-success" data-bind="activeCards.length">18</p>
+                        <p class="text-sm text-gray-500">Active</p>
+                    </div>
+                    <div>
+                        <p class="text-lg font-semibold text-warning" data-bind="draftCards.length">6</p>
+                        <p class="text-sm text-gray-500">Draft</p>
+                    </div>
+                </div>
+                
+                <!-- Filter Controls -->
+                <div class="flex items-center space-x-4">
+                    <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none">
+                        <option>All Dice Types</option>
+                        <option>D4</option>
+                        <option>D6</option>
+                        <option>D8</option>
+                        <option>D10</option>
+                        <option>D12</option>
+                        <option>D20</option>
+                    </select>
+                    
+                    <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none">
+                        <option>All Status</option>
+                        <option>Active</option>
+                        <option>Draft</option>
+                        <option>Archived</option>
+                    </select>
+                    
+                    <button 
+                        class="text-primary hover:text-primary-dark text-sm font-medium"
+                        data-implementation="Clear all filters"
+                    >
+                        Clear Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: StatsBar -->
+
+        <!-- Cards Grid -->
+        <!-- @COMPONENT: CardsGrid [main card display area] -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            
+            <!-- @MAP: cards.map(card => ( -->
+            <!-- Sample Card 1 -->
+            <div class="bg-surface rounded-lg shadow-material hover:shadow-material-lg transition-all duration-200 overflow-hidden group">
+                <div class="p-6">
+                    <!-- Card Header -->
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 mb-1" data-bind="card.name" data-mock="true">Lightning Strike</h3>
+                            <div class="flex items-center space-x-2">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                                    <i class="fas fa-dice-d6 mr-1"></i>
+                                    <span data-bind="card.diceType" data-mock="true">2D6</span>
+                                </span>
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-success/10 text-success" data-bind="card.status" data-mock="true">
+                                    Active
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button 
+                                class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                title="Edit Card"
+                                data-event="click:editCard"
+                                data-implementation="Open edit modal for this card"
+                            >
+                                <i class="fas fa-edit text-gray-600"></i>
+                            </button>
+                            <button 
+                                class="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Delete Card"
+                                data-event="click:deleteCard"
+                                data-implementation="Show delete confirmation dialog"
+                            >
+                                <i class="fas fa-trash text-red-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Effect Description -->
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-600 line-clamp-3" data-bind="card.effectDescription" data-mock="true">
+                            Deal damage equal to the sum of dice rolled. If both dice show the same number, deal double damage and the target is stunned for 1 turn.
+                        </p>
+                    </div>
+                    
+                    <!-- Requirements -->
+                    <div class="mb-4">
+                        <p class="text-xs font-medium text-gray-500 mb-2">Requirements:</p>
+                        <p class="text-sm text-gray-700" data-bind="card.requirements" data-mock="true">Minimum roll: 6, Mana cost: 3</p>
+                    </div>
+                    
+                    <!-- Tags -->
+                    <div class="flex flex-wrap gap-1">
+                        <!-- @MAP: card.tags.map(tag => ( -->
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-mock="true">Damage</span>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-mock="true">Stun</span>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sample Card 2 -->
+            <div class="bg-surface rounded-lg shadow-material hover:shadow-material-lg transition-all duration-200 overflow-hidden group">
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 mb-1" data-mock="true">Healing Potion</h3>
+                            <div class="flex items-center space-x-2">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                                    <i class="fas fa-dice-d8 mr-1"></i>
+                                    <span data-mock="true">1D8</span>
+                                </span>
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-success/10 text-success" data-mock="true">
+                                    Active
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Edit Card">
+                                <i class="fas fa-edit text-gray-600"></i>
+                            </button>
+                            <button class="p-2 hover:bg-red-50 rounded-lg transition-colors" title="Delete Card">
+                                <i class="fas fa-trash text-red-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-600 line-clamp-3" data-mock="true">
+                            Restore health equal to the dice roll. If you roll an 8, gain an additional 2 health and remove one negative status effect.
+                        </p>
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-xs font-medium text-gray-500 mb-2">Requirements:</p>
+                        <p class="text-sm text-gray-700" data-mock="true">No minimum roll, Uses: 3 per battle</p>
+                    </div>
+                    <div class="flex flex-wrap gap-1">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-mock="true">Healing</span>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-mock="true">Utility</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sample Card 3 -->
+            <div class="bg-surface rounded-lg shadow-material hover:shadow-material-lg transition-all duration-200 overflow-hidden group">
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 mb-1" data-mock="true">Shield Wall</h3>
+                            <div class="flex items-center space-x-2">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                                    <i class="fas fa-dice-d12 mr-1"></i>
+                                    <span data-mock="true">1D12</span>
+                                </span>
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning" data-mock="true">
+                                    Draft
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Edit Card">
+                                <i class="fas fa-edit text-gray-600"></i>
+                            </button>
+                            <button class="p-2 hover:bg-red-50 rounded-lg transition-colors" title="Delete Card">
+                                <i class="fas fa-trash text-red-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-600 line-clamp-3" data-mock="true">
+                            Gain armor equal to half the dice roll (rounded up). Lasts for 3 turns or until broken by damage exceeding the armor value.
+                        </p>
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-xs font-medium text-gray-500 mb-2">Requirements:</p>
+                        <p class="text-sm text-gray-700" data-mock="true">Minimum roll: 4, Cooldown: 2 turns</p>
+                    </div>
+                    <div class="flex flex-wrap gap-1">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-mock="true">Defense</span>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-mock="true">Buff</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sample Card 4 -->
+            <div class="bg-surface rounded-lg shadow-material hover:shadow-material-lg transition-all duration-200 overflow-hidden group">
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 mb-1" data-mock="true">Critical Strike</h3>
+                            <div class="flex items-center space-x-2">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                                    <i class="fas fa-dice-d20 mr-1"></i>
+                                    <span data-mock="true">1D20</span>
+                                </span>
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-success/10 text-success" data-mock="true">
+                                    Active
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Edit Card">
+                                <i class="fas fa-edit text-gray-600"></i>
+                            </button>
+                            <button class="p-2 hover:bg-red-50 rounded-lg transition-colors" title="Delete Card">
+                                <i class="fas fa-trash text-red-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-600 line-clamp-3" data-mock="true">
+                            Deal damage equal to dice roll. On a natural 20, deal triple damage and ignore all armor. On 1, you take 2 damage.
+                        </p>
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-xs font-medium text-gray-500 mb-2">Requirements:</p>
+                        <p class="text-sm text-gray-700" data-mock="true">High risk/reward, Weapon required</p>
+                    </div>
+                    <div class="flex flex-wrap gap-1">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-mock="true">Damage</span>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-700" data-mock="true">Risk</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- @END_MAP )) -->
+        </div>
+        <!-- @END_COMPONENT: CardsGrid -->
+        
+        <!-- Load More Button -->
+        <div class="mt-12 text-center">
+            <button 
+                class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg transition-colors"
+                data-implementation="Load more cards with pagination"
+            >
+                Load More Cards
+            </button>
+        </div>
+    </main>
+
+    <!-- Add/Edit Card Modal -->
+    <!-- @COMPONENT: CardModal [form for adding/editing cards] -->
+    <div id="cardModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-surface rounded-lg shadow-material-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900" id="modalTitle">Add New Card</h2>
+                <button 
+                    class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    data-event="click:closeModal"
+                >
+                    <i class="fas fa-times text-gray-600"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <form class="p-6 space-y-6" data-implementation="Handle form submission with validation">
+                <!-- Card Name -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Card Name *</label>
+                    <input 
+                        type="text" 
+                        required
+                        placeholder="Enter card name..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                        data-bind="form.cardName"
+                    >
+                </div>
+                
+                <!-- Dice Requirements -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Dice Type *</label>
+                        <select 
+                            required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                            data-bind="form.diceType"
+                        >
+                            <option value="">Select dice type...</option>
+                            <option value="1D4">1D4</option>
+                            <option value="1D6">1D6</option>
+                            <option value="1D8">1D8</option>
+                            <option value="1D10">1D10</option>
+                            <option value="1D12">1D12</option>
+                            <option value="1D20">1D20</option>
+                            <option value="2D6">2D6</option>
+                            <option value="3D6">3D6</option>
+                            <option value="Custom">Custom</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Roll</label>
+                        <input 
+                            type="number" 
+                            min="1"
+                            placeholder="Optional minimum roll..."
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                            data-bind="form.minRoll"
+                        >
+                    </div>
+                </div>
+                
+                <!-- Effect Description -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Effect Description *</label>
+                    <textarea 
+                        required
+                        rows="4"
+                        placeholder="Describe what this card does when played..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all resize-none"
+                        data-bind="form.effectDescription"
+                    ></textarea>
+                </div>
+                
+                <!-- Requirements -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Additional Requirements</label>
+                    <input 
+                        type="text" 
+                        placeholder="e.g., Mana cost: 3, Cooldown: 2 turns..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                        data-bind="form.requirements"
+                    >
+                </div>
+                
+                <!-- Tags -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                    <input 
+                        type="text" 
+                        placeholder="Separate tags with commas (e.g., Damage, Stun, Magic...)"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                        data-bind="form.tags"
+                    >
+                    <p class="text-xs text-gray-500 mt-1">Used for searching and categorization</p>
+                </div>
+                
+                <!-- Status -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="radio" name="status" value="active" class="mr-2" checked>
+                            <span class="text-sm">Active</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="status" value="draft" class="mr-2">
+                            <span class="text-sm">Draft</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="status" value="archived" class="mr-2">
+                            <span class="text-sm">Archived</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
+                    <button 
+                        type="button"
+                        class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                        data-event="click:closeModal"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        type="submit"
+                        class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary-dark transition-colors"
+                        data-implementation="Validate and save card data"
+                    >
+                        Save Card
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: CardModal -->
+    
+    <!-- Delete Confirmation Modal -->
+    <!-- @COMPONENT: DeleteModal [confirmation dialog] -->
+    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-surface rounded-lg shadow-material-lg max-w-md w-full">
+            <div class="p-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="bg-red-100 p-2 rounded-full">
+                        <i class="fas fa-exclamation-triangle text-red-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Delete Card</h3>
+                        <p class="text-sm text-gray-600">This action cannot be undone.</p>
+                    </div>
+                </div>
+                
+                <p class="text-gray-700 mb-6" data-mock="true">
+                    Are you sure you want to delete "<span class="font-medium">Lightning Strike</span>"? This card will be permanently removed from your collection.
+                </p>
+                
+                <div class="flex items-center justify-end space-x-3">
+                    <button 
+                        type="button"
+                        class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                        data-event="click:closeDeleteModal"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        type="button"
+                        class="bg-error text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                        data-implementation="Confirm card deletion"
+                    >
+                        Delete Card
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: DeleteModal -->
+
+    <!-- Toast Notification -->
+    <!-- @COMPONENT: Toast [success/error messages] -->
+    <div id="toast" class="fixed bottom-4 right-4 z-60 hidden">
+        <div class="bg-success text-white px-4 py-3 rounded-lg shadow-material-lg flex items-center space-x-2">
+            <i class="fas fa-check-circle"></i>
+            <span data-mock="true">Card saved successfully!</span>
+            <button class="ml-2 hover:bg-white hover:bg-opacity-20 rounded p-1">
+                <i class="fas fa-times text-sm"></i>
+            </button>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: Toast -->
+
+    <!-- @STATE: showAddModal:boolean = false -->
+    <!-- @STATE: showDeleteModal:boolean = false -->
+    <!-- @STATE: editingCard:object = null -->
+    <!-- @STATE: cards:array = [] -->
+    <!-- @STATE: filteredCards:array = [] -->
+    <!-- @STATE: searchQuery:string = '' -->
+
+    <script>
+        (function() {
+            // TODO: Implement state management and API integration
+            
+            // Modal functionality
+            const cardModal = document.getElementById('cardModal');
+            const deleteModal = document.getElementById('deleteModal');
+            const toast = document.getElementById('toast');
+            
+            // Show add card modal
+            document.querySelector('[data-event="click:openAddCardModal"]').addEventListener('click', function() {
+                document.getElementById('modalTitle').textContent = 'Add New Card';
+                cardModal.classList.remove('hidden');
+                // TODO: Reset form fields for new card
+            });
+            
+            // Close modals
+            document.querySelectorAll('[data-event="click:closeModal"]').forEach(button => {
+                button.addEventListener('click', function() {
+                    cardModal.classList.add('hidden');
+                });
+            });
+            
+            document.querySelectorAll('[data-event="click:closeDeleteModal"]').forEach(button => {
+                button.addEventListener('click', function() {
+                    deleteModal.classList.add('hidden');
+                });
+            });
+            
+            // Edit card functionality
+            document.querySelectorAll('[data-event="click:editCard"]').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    document.getElementById('modalTitle').textContent = 'Edit Card';
+                    cardModal.classList.remove('hidden');
+                    // TODO: Populate form with existing card data
+                });
+            });
+            
+            // Delete card functionality  
+            document.querySelectorAll('[data-event="click:deleteCard"]').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    deleteModal.classList.remove('hidden');
+                    // TODO: Set card to be deleted in state
+                });
+            });
+            
+            // Close modals when clicking outside
+            cardModal.addEventListener('click', function(e) {
+                if (e.target === cardModal) {
+                    cardModal.classList.add('hidden');
+                }
+            });
+            
+            deleteModal.addEventListener('click', function(e) {
+                if (e.target === deleteModal) {
+                    deleteModal.classList.add('hidden');
+                }
+            });
+            
+            // TODO: Implement search functionality
+            // TODO: Implement form validation
+            // TODO: Implement data persistence
+            // TODO: Implement filter functionality
+            // TODO: Implement pagination
+            
+        })();
+    </script>
+</body>
+</html>

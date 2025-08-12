@@ -1,0 +1,614 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoardGame Card Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    'inter': ['Inter', 'sans-serif'],
+                    'roboto': ['Roboto', 'sans-serif']
+                },
+                colors: {
+                    'primary': '#1976D2',
+                    'primary-dark': '#1565C0',
+                    'primary-light': '#42A5F5',
+                    'secondary': '#388E3C',
+                    'secondary-dark': '#2E7D32',
+                    'accent': '#F57C00',
+                    'success': '#4CAF50',
+                    'warning': '#FF9800',
+                    'error': '#F44336',
+                    'info': '#2196F3'
+                },
+                boxShadow: {
+                    'card': '0 2px 4px rgba(0,0,0,0.1), 0 8px 16px rgba(0,0,0,0.1)',
+                    'card-hover': '0 4px 8px rgba(0,0,0,0.12), 0 16px 24px rgba(0,0,0,0.14)'
+                }
+            }
+        }
+    };
+    </script>
+</head>
+<body class="bg-gray-50 font-roboto">
+    <!-- @COMPONENT: AppHeader -->
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="bg-primary text-white p-2 rounded-lg mr-3">
+                        <i class="fas fa-dice-d20 text-lg"></i>
+                    </div>
+                    <h1 class="text-xl font-inter font-semibold text-gray-900">BoardGame Card Manager</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600" data-bind="cardCount">247 cards</span>
+                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-gray-600 text-sm"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: AppHeader -->
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- @COMPONENT: ActionBar -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
+            <div>
+                <h2 class="text-2xl font-inter font-bold text-gray-900">Card Collection</h2>
+                <p class="mt-1 text-sm text-gray-600">Manage your boardgame cards and their attributes</p>
+            </div>
+            <button 
+                id="createCardBtn"
+                data-event="click:openCreateModal" 
+                class="bg-primary hover:bg-primary-dark text-white px-6 py-2.5 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2 shadow-sm">
+                <i class="fas fa-plus"></i>
+                <span>Create New Card</span>
+            </button>
+        </div>
+        <!-- @END_COMPONENT: ActionBar -->
+
+        <!-- @COMPONENT: SearchAndFilters -->
+        <div class="bg-white rounded-xl shadow-card p-6 mb-6">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-6">
+                <div class="flex-1">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input 
+                            type="text" 
+                            placeholder="Search cards by name, type, or abilities..."
+                            data-implementation="Real-time search with debouncing"
+                            class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200 text-sm bg-gray-50 focus:bg-white">
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                    <select data-implementation="Filter by card type" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm bg-white min-w-0 sm:min-w-[140px]">
+                        <option>All Types</option>
+                        <option data-mock="true">Creature</option>
+                        <option data-mock="true">Spell</option>
+                        <option data-mock="true">Artifact</option>
+                        <option data-mock="true">Enchantment</option>
+                    </select>
+                    <select data-implementation="Filter by cost range" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm bg-white min-w-0 sm:min-w-[140px]">
+                        <option>All Costs</option>
+                        <option data-mock="true">0-2</option>
+                        <option data-mock="true">3-5</option>
+                        <option data-mock="true">6-10</option>
+                        <option data-mock="true">10+</option>
+                    </select>
+                    <select data-implementation="Sort options" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm bg-white min-w-0 sm:min-w-[140px]">
+                        <option>Sort by Name</option>
+                        <option data-mock="true">Sort by Cost</option>
+                        <option data-mock="true">Sort by Type</option>
+                        <option data-mock="true">Sort by Date</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: SearchAndFilters -->
+
+        <!-- @COMPONENT: ViewToggle -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-600">View:</span>
+                <div class="bg-gray-100 p-1 rounded-lg flex">
+                    <button 
+                        id="gridViewBtn"
+                        data-event="click:switchToGridView" 
+                        class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-200 bg-white text-gray-900 shadow-sm">
+                        <i class="fas fa-th-large mr-1"></i>
+                        Grid
+                    </button>
+                    <button 
+                        id="listViewBtn"
+                        data-event="click:switchToListView" 
+                        class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-200 text-gray-600 hover:text-gray-900">
+                        <i class="fas fa-list mr-1"></i>
+                        List
+                    </button>
+                </div>
+            </div>
+            <div class="text-sm text-gray-600">
+                <span data-bind="filteredCount">24</span> of <span data-bind="totalCount">247</span> cards
+            </div>
+        </div>
+        <!-- @END_COMPONENT: ViewToggle -->
+
+        <!-- @COMPONENT: CardGrid -->
+        <div id="cardGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- @MAP: cards.map(card => ( -->
+            <div class="bg-white rounded-xl shadow-card hover:shadow-card-hover transition-shadow duration-300 overflow-hidden group">
+                <div class="relative">
+                    <!-- Card artwork placeholder -->
+                    <div class="h-48 bg-gradient-to-br from-primary-light to-primary relative overflow-hidden">
+                        <div class="absolute inset-0 bg-black bg-opacity-10"></div>
+                        <div class="absolute top-3 left-3">
+                            <span class="bg-white bg-opacity-90 text-primary text-xs font-semibold px-2 py-1 rounded-full" data-bind="card.cost" data-mock="true">3</span>
+                        </div>
+                        <div class="absolute top-3 right-3">
+                            <span class="bg-secondary text-white text-xs font-semibold px-2 py-1 rounded-full" data-bind="card.type" data-mock="true">Creature</span>
+                        </div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-image text-white text-4xl opacity-50"></i>
+                        </div>
+                        <!-- Action buttons on hover -->
+                        <div class="absolute top-3 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex space-x-2">
+                            <button 
+                                data-event="click:editCard" 
+                                data-implementation="Open edit modal with card data"
+                                class="bg-white text-gray-700 hover:text-primary p-2 rounded-full shadow-sm transition-colors duration-200">
+                                <i class="fas fa-edit text-sm"></i>
+                            </button>
+                            <button 
+                                data-event="click:deleteCard" 
+                                data-implementation="Show confirmation dialog"
+                                class="bg-white text-gray-700 hover:text-error p-2 rounded-full shadow-sm transition-colors duration-200">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-inter font-semibold text-lg text-gray-900 mb-2" data-bind="card.name" data-mock="true">Lightning Dragon</h3>
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="flex items-center space-x-2">
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-fist-raised mr-1 text-error"></i>
+                                    <span data-bind="card.attack" data-mock="true">4</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-shield-alt mr-1 text-info"></i>
+                                    <span data-bind="card.defense" data-mock="true">3</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-500">
+                                <i class="fas fa-heart mr-1 text-success"></i>
+                                <span data-bind="card.health" data-mock="true">5</span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600 line-clamp-3 mb-3" data-bind="card.abilities" data-mock="true">
+                            Flying, Haste. When Lightning Dragon enters the battlefield, it deals 2 damage to any target.
+                        </p>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span data-bind="card.rarity" data-mock="true">Rare</span>
+                            <span data-bind="card.updated" data-mock="true">2 days ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional sample cards -->
+            <div class="bg-white rounded-xl shadow-card hover:shadow-card-hover transition-shadow duration-300 overflow-hidden group">
+                <div class="relative">
+                    <div class="h-48 bg-gradient-to-br from-secondary to-green-400 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-black bg-opacity-10"></div>
+                        <div class="absolute top-3 left-3">
+                            <span class="bg-white bg-opacity-90 text-secondary text-xs font-semibold px-2 py-1 rounded-full" data-mock="true">1</span>
+                        </div>
+                        <div class="absolute top-3 right-3">
+                            <span class="bg-accent text-white text-xs font-semibold px-2 py-1 rounded-full" data-mock="true">Spell</span>
+                        </div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-image text-white text-4xl opacity-50"></i>
+                        </div>
+                        <div class="absolute top-3 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex space-x-2">
+                            <button class="bg-white text-gray-700 hover:text-primary p-2 rounded-full shadow-sm transition-colors duration-200">
+                                <i class="fas fa-edit text-sm"></i>
+                            </button>
+                            <button class="bg-white text-gray-700 hover:text-error p-2 rounded-full shadow-sm transition-colors duration-200">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-inter font-semibold text-lg text-gray-900 mb-2" data-mock="true">Healing Potion</h3>
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="text-sm text-gray-500">Instant Spell</div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-heart mr-1 text-success"></i>
+                                <span data-mock="true">+3</span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600 line-clamp-3 mb-3" data-mock="true">
+                            Target player gains 3 life. Draw a card.
+                        </p>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span data-mock="true">Common</span>
+                            <span data-mock="true">5 days ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-card hover:shadow-card-hover transition-shadow duration-300 overflow-hidden group">
+                <div class="relative">
+                    <div class="h-48 bg-gradient-to-br from-purple-500 to-purple-700 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-black bg-opacity-10"></div>
+                        <div class="absolute top-3 left-3">
+                            <span class="bg-white bg-opacity-90 text-purple-600 text-xs font-semibold px-2 py-1 rounded-full" data-mock="true">5</span>
+                        </div>
+                        <div class="absolute top-3 right-3">
+                            <span class="bg-indigo-600 text-white text-xs font-semibold px-2 py-1 rounded-full" data-mock="true">Artifact</span>
+                        </div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-image text-white text-4xl opacity-50"></i>
+                        </div>
+                        <div class="absolute top-3 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex space-x-2">
+                            <button class="bg-white text-gray-700 hover:text-primary p-2 rounded-full shadow-sm transition-colors duration-200">
+                                <i class="fas fa-edit text-sm"></i>
+                            </button>
+                            <button class="bg-white text-gray-700 hover:text-error p-2 rounded-full shadow-sm transition-colors duration-200">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-inter font-semibold text-lg text-gray-900 mb-2" data-mock="true">Mystic Crown</h3>
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="text-sm text-gray-500">Legendary Artifact</div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-magic mr-1 text-purple-500"></i>
+                                <span data-mock="true">+2</span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600 line-clamp-3 mb-3" data-mock="true">
+                            Equipped creature gets +2/+2 and has hexproof. Equip cost: 3
+                        </p>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span data-mock="true">Legendary</span>
+                            <span data-mock="true">1 week ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-card hover:shadow-card-hover transition-shadow duration-300 overflow-hidden group">
+                <div class="relative">
+                    <div class="h-48 bg-gradient-to-br from-red-500 to-red-700 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-black bg-opacity-10"></div>
+                        <div class="absolute top-3 left-3">
+                            <span class="bg-white bg-opacity-90 text-red-600 text-xs font-semibold px-2 py-1 rounded-full" data-mock="true">2</span>
+                        </div>
+                        <div class="absolute top-3 right-3">
+                            <span class="bg-secondary text-white text-xs font-semibold px-2 py-1 rounded-full" data-mock="true">Creature</span>
+                        </div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-image text-white text-4xl opacity-50"></i>
+                        </div>
+                        <div class="absolute top-3 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex space-x-2">
+                            <button class="bg-white text-gray-700 hover:text-primary p-2 rounded-full shadow-sm transition-colors duration-200">
+                                <i class="fas fa-edit text-sm"></i>
+                            </button>
+                            <button class="bg-white text-gray-700 hover:text-error p-2 rounded-full shadow-sm transition-colors duration-200">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-inter font-semibold text-lg text-gray-900 mb-2" data-mock="true">Fire Goblin</h3>
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="flex items-center space-x-2">
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-fist-raised mr-1 text-error"></i>
+                                    <span data-mock="true">2</span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <i class="fas fa-shield-alt mr-1 text-info"></i>
+                                    <span data-mock="true">1</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-heart mr-1 text-success"></i>
+                                <span data-mock="true">2</span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600 line-clamp-3 mb-3" data-mock="true">
+                            Haste. When Fire Goblin dies, it deals 1 damage to any target.
+                        </p>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span data-mock="true">Common</span>
+                            <span data-mock="true">3 days ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_MAP )) -->
+        </div>
+        <!-- @END_COMPONENT: CardGrid -->
+
+        <!-- @COMPONENT: LoadMoreSection -->
+        <div class="mt-8 text-center">
+            <button 
+                data-event="click:loadMore" 
+                data-implementation="Load next batch of cards with pagination"
+                class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2 mx-auto">
+                <span>Load More Cards</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+        <!-- @END_COMPONENT: LoadMoreSection -->
+    </div>
+
+    <!-- @COMPONENT: CreateCardModal -->
+    <div id="createCardModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white px-6 py-4 border-b border-gray-200 rounded-t-xl">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-inter font-semibold text-gray-900">Create New Card</h3>
+                    <button 
+                        id="closeModalBtn"
+                        data-event="click:closeCreateModal" 
+                        class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <form data-implementation="Handle form submission with validation" class="p-6">
+                <!-- @STATE: formData:object = {} -->
+                <!-- @STATE: formErrors:object = {} -->
+                <!-- @STATE: isSubmitting:boolean = false -->
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label for="cardName" class="block text-sm font-medium text-gray-700 mb-2">Card Name *</label>
+                        <input 
+                            type="text" 
+                            id="cardName" 
+                            name="cardName"
+                            data-implementation="Required field with validation"
+                            class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
+                            placeholder="Enter card name"
+                            required>
+                    </div>
+                    
+                    <div>
+                        <label for="cardType" class="block text-sm font-medium text-gray-700 mb-2">Type *</label>
+                        <select 
+                            id="cardType" 
+                            name="cardType"
+                            data-implementation="Required field with validation"
+                            class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
+                            required>
+                            <option value="">Select type</option>
+                            <option value="creature" data-mock="true">Creature</option>
+                            <option value="spell" data-mock="true">Spell</option>
+                            <option value="artifact" data-mock="true">Artifact</option>
+                            <option value="enchantment" data-mock="true">Enchantment</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="cardCost" class="block text-sm font-medium text-gray-700 mb-2">Mana Cost *</label>
+                        <input 
+                            type="number" 
+                            id="cardCost" 
+                            name="cardCost"
+                            data-implementation="Required number field with min/max validation"
+                            class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
+                            placeholder="0"
+                            min="0"
+                            max="20"
+                            required>
+                    </div>
+                    
+                    <div>
+                        <label for="cardAttack" class="block text-sm font-medium text-gray-700 mb-2">Attack</label>
+                        <input 
+                            type="number" 
+                            id="cardAttack" 
+                            name="cardAttack"
+                            data-implementation="Optional number field for creature cards"
+                            class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
+                            placeholder="0"
+                            min="0"
+                            max="50">
+                    </div>
+                    
+                    <div>
+                        <label for="cardDefense" class="block text-sm font-medium text-gray-700 mb-2">Defense</label>
+                        <input 
+                            type="number" 
+                            id="cardDefense" 
+                            name="cardDefense"
+                            data-implementation="Optional number field for creature cards"
+                            class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
+                            placeholder="0"
+                            min="0"
+                            max="50">
+                    </div>
+                    
+                    <div>
+                        <label for="cardHealth" class="block text-sm font-medium text-gray-700 mb-2">Health</label>
+                        <input 
+                            type="number" 
+                            id="cardHealth" 
+                            name="cardHealth"
+                            data-implementation="Optional number field for creature cards"
+                            class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
+                            placeholder="0"
+                            min="1"
+                            max="50">
+                    </div>
+                    
+                    <div>
+                        <label for="cardRarity" class="block text-sm font-medium text-gray-700 mb-2">Rarity</label>
+                        <select 
+                            id="cardRarity" 
+                            name="cardRarity"
+                            data-implementation="Optional field with default value"
+                            class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200">
+                            <option value="common" data-mock="true">Common</option>
+                            <option value="uncommon" data-mock="true">Uncommon</option>
+                            <option value="rare" data-mock="true">Rare</option>
+                            <option value="legendary" data-mock="true">Legendary</option>
+                        </select>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label for="cardAbilities" class="block text-sm font-medium text-gray-700 mb-2">Abilities & Description</label>
+                        <textarea 
+                            id="cardAbilities" 
+                            name="cardAbilities"
+                            data-implementation="Optional textarea for card text"
+                            rows="4"
+                            class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200 resize-none"
+                            placeholder="Describe the card's abilities, effects, and flavor text..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
+                    <button 
+                        type="button" 
+                        id="cancelBtn"
+                        data-event="click:closeCreateModal"
+                        class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors duration-200">
+                        Cancel
+                    </button>
+                    <button 
+                        type="submit"
+                        data-event="submit:createCard" 
+                        data-implementation="Submit form with validation and loading state"
+                        class="px-6 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2">
+                        <span>Create Card</span>
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: CreateCardModal -->
+
+    <!-- @COMPONENT: LoadingOverlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p class="text-gray-600 font-medium">Loading cards...</p>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: LoadingOverlay -->
+
+    <!-- @COMPONENT: ToastNotification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-white border-l-4 border-success shadow-card rounded-lg p-4 z-50 hidden max-w-sm">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <i class="fas fa-check-circle text-success text-xl"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm font-medium text-gray-900" data-bind="toast.message" data-mock="true">Card created successfully!</p>
+            </div>
+            <div class="ml-4">
+                <button 
+                    data-event="click:closeToast"
+                    class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: ToastNotification -->
+
+    <script>
+    // TODO: Implement business logic, API calls, and state management
+    (function() {
+        // Basic UI interaction handling - no business logic
+        const createCardBtn = document.getElementById('createCardBtn');
+        const createCardModal = document.getElementById('createCardModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const gridViewBtn = document.getElementById('gridViewBtn');
+        const listViewBtn = document.getElementById('listViewBtn');
+        const cardGrid = document.getElementById('cardGrid');
+
+        // Modal controls
+        function openCreateModal() {
+            createCardModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCreateModal() {
+            createCardModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // View toggle (visual only)
+        function switchToGridView() {
+            gridViewBtn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+            gridViewBtn.classList.remove('text-gray-600', 'hover:text-gray-900');
+            listViewBtn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+            listViewBtn.classList.add('text-gray-600', 'hover:text-gray-900');
+            
+            cardGrid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6';
+        }
+
+        function switchToListView() {
+            listViewBtn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+            listViewBtn.classList.remove('text-gray-600', 'hover:text-gray-900');
+            gridViewBtn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+            gridViewBtn.classList.add('text-gray-600', 'hover:text-gray-900');
+            
+            cardGrid.className = 'grid grid-cols-1 gap-4';
+        }
+
+        // Event listeners
+        createCardBtn?.addEventListener('click', openCreateModal);
+        closeModalBtn?.addEventListener('click', closeCreateModal);
+        cancelBtn?.addEventListener('click', closeCreateModal);
+        gridViewBtn?.addEventListener('click', switchToGridView);
+        listViewBtn?.addEventListener('click', switchToListView);
+
+        // Close modal on backdrop click
+        createCardModal?.addEventListener('click', function(e) {
+            if (e.target === createCardModal) {
+                closeCreateModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !createCardModal.classList.contains('hidden')) {
+                closeCreateModal();
+            }
+        });
+
+        // Form submission placeholder (prevent default for demo)
+        const createForm = createCardModal?.querySelector('form');
+        createForm?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Form submission would happen here');
+            // TODO: Implement form validation and submission
+            closeCreateModal();
+        });
+    })();
+    </script>
+</body>
+</html>
